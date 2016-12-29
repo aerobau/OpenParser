@@ -1,0 +1,110 @@
+// matrix_calc.parse
+//
+// Syntax rules for the matrix calculator
+
+LEX_START
+
+    // Lexing rules for the matrix calculator
+    // keyword action identifier string
+    // Keywords:
+    //      exact - use exact sequence
+    //      regex - use regular expression parsing
+    //      allcase - detect all occurrences without worrying about lower/upper case
+    //
+    // actions:
+    //      skip - Skip the selected string segment
+    //      node - create a node for the value, with the name of the token
+    //      rule - defer to the parsing rules associated with the identifier
+    // New line (\n) ends the definition
+
+    regex skip comment           //.*\n
+    regex skip whitespace        [ \t\v\f]*
+
+    regex node integer           [0-9]+
+    regex node character         '[^\']'
+    regex node string_literal    \"[^\"]*\"
+    regex node name              [_a-zA-Z][_a-zA-Z0-9]*
+
+    exact skip newLine           \n
+    exact rule struct            struct
+    exact rule matrix            matrix
+    exact rule long              long
+    exact rule int               int
+    exact rule double            double
+    exact rule float             float
+    exact rule while             while
+    exact rule for               for
+    exact rule if                if
+    exact rule else              else
+    exact rule switch            switch
+    exact rule case              case
+    exact rule namespace         namespace
+    exact rule func              func
+    exact rule return            return
+
+    exact rule =                 =
+    exact rule ==                ==
+    exact rule !=                !=
+    exact rule <=                <=
+    exact rule >=                >=
+    exact rule >                 >
+    exact rule <                 <
+    exact rule &&                &&
+    exact rule ||                ||
+    exact rule !                 !
+    exact rule *                 *
+    exact rule /                 /
+    exact rule -                 -
+    exact rule +                 +
+    exact rule :                 :
+    exact rule ;                 ;
+    exact rule [                 [
+    exact rule ]                 ]
+    exact rule (                 (
+    exact rule )                 )
+    exact rule ^                 ^
+
+LEX_END
+
+PARSE_BEGIN
+
+    // Parsing rules for the matrix calculator
+    // Denoted by the A -> XXX formatting
+    // Follows the lexing rules provided in the file
+
+
+    PRECEDENCE1 {
+        -> integer
+        -> character
+        -> string
+        -> character
+        -> name
+    }
+
+    PRECEDENCE2 {
+        -> PRECEDENCE1 ^ PRECEDENCE2
+        -> PRECEDENCE1
+    }
+
+    PRECEDENCE3 {
+        -> + PRECEDENCE2
+        -> - PRECEDENCE2
+        -> ! PRECEDENCE2
+        -> PRECEDENCE2
+    }
+
+    PRECEDENCE4 {
+        -> PRECEDENCE3 * PRECEDENCE4
+        -> PRECEDENCE3 / PRECEDENCE4
+        -> PRECEDENCE3 && PRECEDENCE4
+        -> PRECEDENCE3
+    }
+
+    PRECEDENCE5 {
+        -> PRECEDENCE4 + PRECEDENCE5
+        -> PRECEDENCE4 - PRECEDENCE5
+        -> PRECEDENCE4 || PRECEDENCE5
+        -> PRECEDENCE4
+     }
+
+ PARSE_END
